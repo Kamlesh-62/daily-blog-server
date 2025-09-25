@@ -1,0 +1,6 @@
+{
+  "watch": ["app", ".env"],
+  "ext": "ts,env",
+  "ignore": ["dist"],
+  "exec": "ts-node app/server.ts"
+}

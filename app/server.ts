@@ -1,26 +1,42 @@
-const express = require("express");
-const helmet = require("helmet");
-const app = express();
-const cors = require('cors')
-const dotenv = require("dotenv");
-const cookieParser = require('cookie-parser');
-const errorMiddleware = require("./middlewares/errorHandler");
-dotenv.config();
+// Bootstrap HTTP server with typed middleware and routes.
+import "dotenv/config"; // loads .env into process.env
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import routes from "./routes/routes";
+import { errorHandler } from "./middlewares/errorHandler";
 
+const app = express();
+
+// -- Core middleware --
+// URL-encoded
+app.use(express.urlencoded({ extended: true }));
+//  JSON
 app.use(express.json());
+//  Security
 app.use(helmet());
-app.use(cors());
+
+//  CORS
+const allowedOrigins: string[] = ["http://localhost:3000"];
+const corsOptions: cors.CorsOptions = {
+  origin: allowedOrigins,
+  credentials: true, 
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+};
+app.use(cors(corsOptions));
+//  Cookies
 app.use(cookieParser());
 
+// Routes
+const prefix: string = process.env.PREFIX || "/api";
+app.use(prefix, routes);
 
-const routeRouter = require("./routes/routes");
-const prefixUrl = process.env.PREFIX;
-app.use(prefixUrl, routeRouter);        
-// error handler
-app.use(errorMiddleware);
+// Error handler (must be last)
+app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// Start server
+const port: number = Number(process.env.PORT) || 4000;
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}${prefix}`);
 });
-

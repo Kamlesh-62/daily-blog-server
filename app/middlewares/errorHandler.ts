@@ -1,16 +1,21 @@
+// Centralized error normalization. Throw AppError for custom status codes.
 import { Request, Response, NextFunction } from "express";
 
-export interface AppError extends Error {
-    status?: number;
+export class AppError extends Error {
+  status: number;
+  constructor(message = "Internal Server Error", status = 500) {
+    super(message);
+    this.status = status;
+  }
 }
 
-exports.module = (
-  err: AppError,
-  req: Request,
+export const errorHandler = (
+  err: Error | AppError,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
-  console.error(err);
-  err.status = err.status || 500;
-  return res.status(err.status).json({ error: err.message || "Something went wrong" });
+  const status = (err as AppError).status || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ status, success: false, message });
 };

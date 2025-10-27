@@ -3,10 +3,9 @@ import { Router, Request, Response } from "express";
 const router = Router();
 
 // list of routers
-import { login } from "../controllers/auth/auth";
-
+import { UserSessionGenerate } from "../controllers/auth/auth";
 
 // auth
-router.post("/login", login);
+router.post("/auth/sync", UserSessionGenerate);
 
 export default router;
